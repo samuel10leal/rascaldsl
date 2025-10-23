@@ -5,25 +5,26 @@ layout Layout = (Space | Comment)*;
 lexical Space   = [\ \t\r]+;
 lexical Comment = @category="Comment" "#" ![\n]* $;
 
-// NL explícito (Windows/Unix) y no-terminal 'nl'
+// NL explícito (Windows/Unix) y no-terminal 'Newline'
 lexical NL = "\r\n" | "\n";
-syntax nl  = NL;
+syntax Newline  = NL;
 
 // ========= Programa / Módulos =========
-start syntax Program = { Module | Stmt }+;
+syntax Program = (Module | Stmt)+;
+start syntax Program = Program;
 syntax Module = FuncDef | DataDef;
 
 // ========= Sentencias y bloques =========
 syntax Stmt
-  = DeclVars nl
-  | Assign nl
+  = DeclVars Newline
+  | Assign Newline
   | ForStmt
-  | IfExpr nl
-  | CondExpr nl
-  | Expr nl
+  | IfExpr Newline
+  | CondExpr Newline
+  | Expr Newline
   ;
 
-syntax Block = 'do' nl { Stmt } 'end';
+syntax Block = 'do' { Stmt } 'end';
 
 // ========= Declaraciones / Asignaciones / LValue =========
 syntax DeclVars = ids: Identifier { "," Identifier };
@@ -38,7 +39,7 @@ syntax ParamList   = Identifier { ',' Identifier };
 syntax ArgList     = Expr { ',' Expr };
 
 // ========= Tipos algebraicos (esqueleto) =========
-syntax DataDef = name: Identifier '=' 'data' 'with' OpList nl { FuncDef } 'end' Identifier;
+syntax DataDef = name: Identifier '=' 'data' 'with' OpList Newline { FuncDef } 'end' Identifier;
 syntax OpList  = OpName { ',' OpName };
 syntax OpName  = Identifier;
 
@@ -61,9 +62,9 @@ syntax ForStmt
   ;
 
 // ========= If y cond =========
-syntax IfExpr = 'if' Expr nl 'then' Expr nl 'else' Expr nl 'end';
+syntax IfExpr = 'if' Expr Newline 'then' Expr Newline 'else' Expr Newline 'end';
 
-syntax CondExpr   = 'cond' Expr 'do' nl CondClause { nl CondClause } nl 'end';
+syntax CondExpr   = 'cond' Expr 'do' Newline CondClause { Newline CondClause } Newline 'end';
 syntax CondClause = Expr '->' Expr;
 
 // ========= Expresiones (precedencias) =========
