@@ -1,0 +1,7 @@
+{
+  "rascal.java.home": "C:\\Program Files\\Eclipse Adoptium\\jdk-11.0.28.6-hotspot",
+  "terminal.integrated.env.windows": {
+    "JAVA_HOME": "C:\\Program Files\\Eclipse Adoptium\\jdk-11.0.28.6-hotspot",
+    "Path": "C:\\Program Files\\Eclipse Adoptium\\jdk-11.0.28.6-hotspot\\bin;${env:Path}"
+  }
+}
