@@ -1,0 +1,15 @@
+a = 1 + 2
+b = a ** 3
+if a < b
+then 111
+else 222
+end
+
+for i from 1 to 3 do
+  a = a + i
+end
+
+cond a do
+  a > 10 -> 999
+  a < 0  -> -1
+end
