@@ -1,13 +1,24 @@
 module Syntax
 
-// === Layout y saltos de línea (NO consumir '\n' en layout) ===
+
 layout Layout = (Space | Comment)*;
 lexical Space   = [\ \t\r]+;
 lexical Comment = @category="Comment" "#" ![\n]* $;
 
-// NL explícito (Windows/Unix) y no-terminal 'Newline'
+
 lexical NL = "\r\n" | "\n";
 syntax Newline  = NL;
+
+// ========= Tipos =========
+syntax Type
+  = "Int"
+  | "Bool"
+  | "Char"
+  | "String"
+  | Identifier         
+  | Type "[" "]"        
+  | "(" Type ")"        
+  ;
 
 // ========= Programa / Módulos =========
 syntax Program = (Module | Stmt)+;
@@ -27,7 +38,8 @@ syntax Stmt
 syntax Block = 'do' { Stmt } 'end';
 
 // ========= Declaraciones / Asignaciones / LValue =========
-syntax DeclVars = ids: Identifier { "," Identifier };
+syntax DeclVars = ids: Identifier { "," Identifier } ":" Type;
+
 syntax Assign   = lv: LValue '=' e: Expr;
 syntax LValue   = base: Identifier { '.' Identifier | '$' Identifier };
 
@@ -36,6 +48,7 @@ syntax FuncDef     = header: FuncHeader body: Block 'end' name: Identifier;
 syntax FuncHeader  = name: Identifier '=' 'function' '(' Params ')';
 syntax Params      = [ ParamList ];
 syntax ParamList   = Identifier { ',' Identifier };
+
 syntax ArgList     = Expr { ',' Expr };
 
 // ========= Tipos algebraicos (esqueleto) =========
@@ -106,13 +119,3 @@ keyword Reserved =
   "cond" | "do" | "data" | "end" | "for" | "from" | "then" | "function"
 | "else" | "if" | "in" | "iterator" | "sequence" | "struct" | "to" | "tuple"
 | "with" | "yielding" | "and" | "or" | "neg" | "true" | "false";
-
-
-
-
-
-
-
-
-
-

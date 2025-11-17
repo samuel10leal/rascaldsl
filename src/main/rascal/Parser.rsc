@@ -38,8 +38,13 @@ private list[Stmt] implodeBlock((Block) ` do <nl> <{Stmt} ss> end `)
   = [ implodeStmt(s) | s <- ss ];
 
 public Stmt implodeStmt(Stmt s) {
-  if (/ (Stmt) ` <DeclVars d> <nl> ` := s)
-    return sDecl([ "<id>" | / (Identifier) id := d]);
+  // AHORA DeclVars es: ids ":" Type
+  // Aquí seguimos recogiendo solo los identificadores, el tipo lo deja-
+  // mos para el type checker (TypePal) que trabajará sobre el CST.
+  if (/ (Stmt) ` <DeclVars d> <nl> ` := s) {
+    list[str] ids = [ "<id>" | / (Identifier) id := d ];
+    return sDecl(ids);
+  }
 
   if (/ (Stmt) ` <Assign a> <nl> ` := s)
     return sAssign(implodeLV(a.lv), implodeExpr(a.e));
@@ -108,7 +113,9 @@ public Exp implodeExpr(Expr e) {
   if (/ (Call) ` <PrimaryNoCall t> ( <[ArgList]> ) ` := e) {
     if (/ (Identifier) id := t) {
       list[Exp] args = [];
-      if (/ (ArgList) al := e) for (/ (Expr) ex := al) args += implodeExpr(ex);
+      if (/ (ArgList) al := e) 
+        for (/ (Expr) ex := al) 
+          args += implodeExpr(ex);
       return eCall("<id>", args);
     }
   }
@@ -119,9 +126,11 @@ public Exp implodeExpr(Expr e) {
 private Exp implodeCond(CondExpr c) {
   // Reducción simple del 'cond': ((X and a1)?b1 : ((X and a2)?b2 : ...))
   list[<Exp,Exp>] pairs = [];
-  for (/ (CondClause) ` <Expr a> -> <Expr b> ` := c) pairs += <implodeExpr(a), implodeExpr(b)>;
+  for (/ (CondClause) ` <Expr a> -> <Expr b> ` := c) 
+    pairs += <implodeExpr(a), implodeExpr(b)>;
 
-  if (size(pairs) == 0) return eLit(VNull());
+  if (size(pairs) == 0) 
+    return eLit(VNull());
 
   Exp guard = implodeExpr(c.arg[0]);
   Exp acc = eLit(VNull());
@@ -131,5 +140,3 @@ private Exp implodeCond(CondExpr c) {
   }
   return acc;
 }
-
-
