@@ -1,5 +1,8 @@
-Manifest-Version: 0.0.1
+Manifest-Version: 1.0.0
 Project-Name: rascaldsl
 Source: src/main/rascal
-Require-Libraries: |lib://dsl-project|
-    
+
+Require-Libraries: 
+    |lib://rascal-src|,
+    |lib://typepal|,
+    |lib://rascal-lsp| 

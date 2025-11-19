@@ -120,7 +120,9 @@ public Exp implodeExpr(Expr e) {
   if (/ (Call) ` <PrimaryNoCall t> ( <[ArgList]> ) ` := e) {
     if (/ (Identifier) id := t) {
       list[Exp] args = [];
-      if (/ (ArgList) al := e) for (/ (Expr) ex := al) args += implodeExpr(ex);
+      if (/ (ArgList) al := e) 
+        for (/ (Expr) ex := al) 
+          args += implodeExpr(ex);
       return eCall("<id>", args);
     }
   }
@@ -131,9 +133,11 @@ public Exp implodeExpr(Expr e) {
 private Exp implodeCond(CondExpr c) {
   // Reducción simple del 'cond': ((X and a1)?b1 : ((X and a2)?b2 : ...))
   list[<Exp,Exp>] pairs = [];
-  for (/ (CondClause) ` <Expr a> -> <Expr b> ` := c) pairs += <implodeExpr(a), implodeExpr(b)>;
+  for (/ (CondClause) ` <Expr a> -> <Expr b> ` := c) 
+    pairs += <implodeExpr(a), implodeExpr(b)>;
 
-  if (size(pairs) == 0) return eLit(VNull());
+  if (size(pairs) == 0) 
+    return eLit(VNull());
 
   Exp guard = implodeExpr(c.arg[0]);
   Exp acc = eLit(VNull());
@@ -162,5 +166,3 @@ private TypeAnn implodeType(Type t) {
 }
 
 private str stripDelimiters(str raw) = substring(raw, 1, size(raw) - 1);
-
-

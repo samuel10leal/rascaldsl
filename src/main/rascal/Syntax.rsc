@@ -1,4 +1,4 @@
-﻿module Syntax
+module Syntax
 
 // === Layout y saltos de línea (NO consumir '\n' en layout) ===
 layout Layout = (Space | Comment)*;
@@ -27,7 +27,7 @@ syntax Block = 'do' nl { Stmt } 'end';
 
 // ========= Declaraciones / Asignaciones / LValue =========
 syntax DeclVars = ty: Type vars: VarList;
-syntax VarList   = Identifier { "," Identifier };
+syntax VarList  = Identifier { "," Identifier };
 syntax Assign   = lv: LValue '=' e: Expr;
 syntax LValue   = base: Identifier { '.' Identifier | '$' Identifier };
 
@@ -117,14 +117,3 @@ keyword Reserved =
 | "else" | "if" | "in" | "iterator" | "sequence" | "struct" | "to" | "tuple"
 | "with" | "yielding" | "and" | "or" | "neg" | "true" | "false"
 | "Int" | "Bool" | "Char" | "String";
-
-
-
-
-
-
-
-
-
-
-

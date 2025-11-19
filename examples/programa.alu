@@ -1,6 +1,7 @@
-Int a, b
+Int a, b, i
 a = 1 + 2
 b = a ** 3
+
 if a < b
 then 111
 else 222
