@@ -1,10 +1,12 @@
-module Eval
+﻿module Eval
 import IO;
 import String;
 import List;
 import Map;
 import Math;
 import AST;
+
+public alias Env = map[str, Value];
 
 
 private Value callBuiltin(str name, list[Value] args) {
@@ -42,14 +44,18 @@ return VNull();
 
 
 private Env setLV(LV lv, Value v, Env env) {
-if (lvId?(lv)) return env + (lv.lvId.name : v);
+switch (lv) {
+case lvId(str name): return env + (name : v);
+}
 // Campos/`$` no implementados en el mini‑ejecutor (se pueden mapear contra VStruct)
 return env;
 }
 
 
 private Value getLV(LV lv, Env env) {
-if (lvId?(lv)) return lookup(lv.lvId.name, env);
+switch (lv) {
+case lvId(str name): return lookup(name, env);
+}
 return VNull();
 }
 
@@ -64,11 +70,13 @@ private bool asBool(Value v) = VBool?(v) ? v.b : (VNum?(v) ? v.n != 0 : false);
 public str show(Value v) {
 if (VNum?(v)) return "<v.n>";
 if (VBool?(v)) return "<v.b>";
+if (VChar?(v)) return v.ch;
 if (VStr?(v)) return v.s;
 if (VTuple?(v)) return "(<show(v.a)>, <show(v.b)>)";
 if (VSeq?(v)) return "[" + intercalate(", ", [ show(x) | x <- v.xs ]) + "]";
 if (VStruct?(v)) return "{" + intercalate(", ", [ k+":"+show(v.fields[k]) | k <- sort(keys(v.fields)) ]) + "}";
 return "null";
 }
+
 
 

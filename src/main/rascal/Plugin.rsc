@@ -5,6 +5,7 @@ import util::LanguageServer;
 import Syntax;
 import parser::ALUParser;
 import eval::ALUEval;
+import typepal::ALUTypeChecker;
 
 
 PathConfig pcfg = getProjectPathConfig(|project://alu_rascal|);
@@ -23,6 +24,7 @@ executor(exec)
 
 value exec(runALU(Program p)) {
 ast = implodeProgram(p);
+typeCheck(ast);
 <Value res, Env env> = evalProgram(ast);
 println("Resultado: <show(res)>");
 return ("ok": true);

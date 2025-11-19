@@ -29,17 +29,21 @@ private Func implodeFunc((FuncDef) ` <FuncHeader h> <Block b> end <Identifier n>
 }
 
 private Data implodeData((DataDef) ` <Identifier n> = data with <OpList ops> <nl> <{FuncDef} fdefs> end <Identifier _> `) {
-  list[str] ctors = [];
-  for (/ (OpName) ` <Identifier id> ` := ops) ctors += "<id>";
-  return dataDef("<n>", ctors);
+  list[FieldDecl] fields = [];
+  for (/ (OpName) ` <Identifier id> : <Type ty> ` := ops) {
+    fields += field("<id>", implodeType(ty));
+  }
+  list[Func] methods = [ implodeFunc(f) | f <- fdefs ];
+  return dataDef("<n>", fields, methods);
 }
 
 private list[Stmt] implodeBlock((Block) ` do <nl> <{Stmt} ss> end `)
   = [ implodeStmt(s) | s <- ss ];
 
 public Stmt implodeStmt(Stmt s) {
-  if (/ (Stmt) ` <DeclVars d> <nl> ` := s)
-    return sDecl([ "<id>" | / (Identifier) id := d]);
+  if (/ (Stmt) ` <DeclVars d> <nl> ` := s) {
+    return sDecl(implodeType(d.ty), implodeVarList(d.vars));
+  }
 
   if (/ (Stmt) ` <Assign a> <nl> ` := s)
     return sAssign(implodeLV(a.lv), implodeExpr(a.e));
@@ -71,7 +75,8 @@ public Exp implodeExpr(Expr e) {
   // Literales
   if (/ (Literal) ` <Number n> ` := e)   return eLit(VNum(toReal("<n>")));
   if (/ (Literal) ` <Boolean b> ` := e)  return eLit(VBool("<b>" == "true"));
-  if (/ (Literal) ` <String s> ` := e)   return eLit(VStr(replaceAll("<s>", "\"", "")));
+  if (/ (Literal) ` <Char c> ` := e)     return eLit(VChar(stripDelimiters("<c>")));
+  if (/ (Literal) ` <String s> ` := e)   return eLit(VStr(stripDelimiters("<s>")));
 
   // Primarios
   if (/ (Expr) ` <Identifier i> ` := e)  return eVar("<i>");
@@ -80,6 +85,13 @@ public Exp implodeExpr(Expr e) {
     return eTuple(implodeExpr(a), implodeExpr(b));
   if (/ (SequenceLit) ` sequence ( <{Expr} xs> ) ` := e)
     return eSeq([ implodeExpr(x) | x <- xs ]);
+  if (/ (StructLit) ` struct <Identifier t> ( <StructFields fs> ) ` := e) {
+    map[str, Exp] fields = ();
+    for (/ (StructField) ` <Identifier f> : <Expr ex> ` := fs) {
+      fields += ("<f>" : implodeExpr(ex));
+    }
+    return eStruct("<t>", fields);
+  }
 
   // LValue lectura
   if (/ (Expr) ` <LValue lv> ` := e)     return eGet(implodeLV(lv));
@@ -131,5 +143,24 @@ private Exp implodeCond(CondExpr c) {
   }
   return acc;
 }
+
+private list[str] implodeVarList(VarList vars)
+  = [ "<id>" | / (Identifier) id := vars ];
+
+private TypeAnn implodeType(Type t) {
+  if (/ (Type) ` Int ` := t)    return tNumber();
+  if (/ (Type) ` Bool ` := t)   return tBool();
+  if (/ (Type) ` Char ` := t)   return tChar();
+  if (/ (Type) ` String ` := t) return tString();
+  if (/ (Type) ` sequence < <Type el> > ` := t)
+    return tSequence(implodeType(el));
+  if (/ (Type) ` tuple ( <Type l> , <Type r> ) ` := t)
+    return tTuple(implodeType(l), implodeType(r));
+  if (/ (Type) ` <Identifier id> ` := t)
+    return tStruct("<id>");
+  return tUnknown("<t>");
+}
+
+private str stripDelimiters(str raw) = substring(raw, 1, size(raw) - 1);
 
 

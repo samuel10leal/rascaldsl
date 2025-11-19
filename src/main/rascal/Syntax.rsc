@@ -1,4 +1,4 @@
-module Syntax
+﻿module Syntax
 
 // === Layout y saltos de línea (NO consumir '\n' en layout) ===
 layout Layout = (Space | Comment)*;
@@ -26,7 +26,8 @@ syntax Stmt
 syntax Block = 'do' nl { Stmt } 'end';
 
 // ========= Declaraciones / Asignaciones / LValue =========
-syntax DeclVars = ids: Identifier { "," Identifier };
+syntax DeclVars = ty: Type vars: VarList;
+syntax VarList   = Identifier { "," Identifier };
 syntax Assign   = lv: LValue '=' e: Expr;
 syntax LValue   = base: Identifier { '.' Identifier | '$' Identifier };
 
@@ -40,10 +41,20 @@ syntax ArgList     = Expr { ',' Expr };
 // ========= Tipos algebraicos (esqueleto) =========
 syntax DataDef = name: Identifier '=' 'data' 'with' OpList nl { FuncDef } 'end' Identifier;
 syntax OpList  = OpName { ',' OpName };
-syntax OpName  = Identifier;
+syntax OpName  = Identifier ':' Type;
+
+// ========= Tipos =========
+syntax Type
+  = BaseType
+  | 'sequence' '<' Type '>'
+  | 'tuple' '(' Type ',' Type ')'
+  | Identifier
+  ;
+
+syntax BaseType = 'Int' | 'Bool' | 'Char' | 'String';
 
 // ========= Literales compuestos =========
-syntax StructLit    = 'struct' '(' StructFields ')';
+syntax StructLit    = 'struct' Identifier '(' StructFields ')';
 syntax StructFields = StructField { ',' StructField };
 syntax StructField  = Identifier ':' Expr;
 
@@ -104,7 +115,9 @@ lexical Identifier = [a-zA-Z] [a-zA-Z0-9\-]*;
 keyword Reserved =
   "cond" | "do" | "data" | "end" | "for" | "from" | "then" | "function"
 | "else" | "if" | "in" | "iterator" | "sequence" | "struct" | "to" | "tuple"
-| "with" | "yielding" | "and" | "or" | "neg" | "true" | "false";
+| "with" | "yielding" | "and" | "or" | "neg" | "true" | "false"
+| "Int" | "Bool" | "Char" | "String";
+
 
 
 
